@@ -1,1 +1,59 @@
+import pygame
+pygame.init()
 
+BOARD_SIZE_X = 90
+BOARD_SIZE_Y = 60
+SQUARE_SIZE = 30
+
+cam_x = 0
+cam_y = 0
+speed = 2
+keys = None
+color_bg = (180, 180, 180)
+
+#0 = podlaha
+#1 = zed_s
+#2 = zed_v
+#3 = zed_j
+#4 = zed_v
+#5 = dvere
+#6 = void
+
+#board =
+
+screen = pygame.display.set_mode((30 * SQUARE_SIZE, 20 * SQUARE_SIZE))
+
+
+def game_input():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exit()
+
+
+def game_update():
+    keys = pygame.key.get_pressed()
+    global cam_x
+    global cam_y
+    if keys[pygame.K_d]:
+        cam_x -= speed
+    if keys[pygame.K_a]:
+        cam_x += speed
+    if keys[pygame.K_w]:
+        cam_y += speed
+    if keys[pygame.K_s]:
+        cam_y -= speed
+
+
+def game_output():
+    screen.fill((0, 0, 0))
+    for y in range(0, BOARD_SIZE_Y, 1):
+        for x in range(0, BOARD_SIZE_X, 1):
+            pygame.draw.rect(screen, color_bg, (cam_x + x * SQUARE_SIZE, cam_y + y * SQUARE_SIZE, SQUARE_SIZE - 1, SQUARE_SIZE - 1))
+    pygame.display.flip()
+
+
+
+while True:
+    game_input()
+    game_update()
+    game_output()
