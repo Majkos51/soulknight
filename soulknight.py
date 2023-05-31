@@ -41,6 +41,8 @@ board = [
 current = (-1, -1)
 current_x = -1
 current_y = -1
+timer = 60
+
 
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
@@ -50,7 +52,7 @@ cam_x = 0
 cam_y = 0
 dx = 0
 dy = 0
-speed = 10
+speed = 5
 True_HP = 8
 mana = 160
 keys = None
@@ -63,11 +65,14 @@ image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
 img = pygame.transform.scale(image, (19 * 50, 20 * 50))
 K_night = pygame.image.load("data_Soul/Knight.png")
 Knight = pygame.transform.scale(K_night, (60, 60))
+B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
+Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
 Or_c = pygame.image.load("data_Soul/Orc.png")
 Orc = pygame.transform.scale(Or_c, (55, 55))
 t_rig = pygame.image.load("data_Soul/trigger.png")
 trigger = pygame.transform.scale(t_rig, (30, 30))
 
+knight_dir = Knight
 # print(str(img.width) + ' ' + str(img.height))
 tiles = [
     (1, 1),  # 0 = podlaha
@@ -87,9 +92,7 @@ screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 
 
 def game_input():
-    global shoot
-    global dx, dy
-    global mana
+    global mana, knight_dir, dx, dy, shoot
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -100,10 +103,12 @@ def game_input():
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
+        knight_dir = Knight
         dx = 0
         dy = 0
         dx = -speed
     elif keys[pygame.K_a]:
+        knight_dir = Back_Knight
         dx = 0
         dy = 0
         dx = speed
@@ -137,17 +142,17 @@ def on_mouse_down(event):
 
 
 def game_update():
-    global cam_x, dx
-    global cam_y, dy
-    global shoot, click
+    global shoot, click, cam_y, dy, cam_x, dx, timer
     cam_x += dx
     cam_y += dy
     global HP
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
-    ticks = pygame.time.get_ticks()
-    # if #click != None and (ticks - click) % 1000 == 0:
-    #     shoot = False
 
+    if shoot:
+        timer -= 1
+        if timer <= 0:
+            shoot = False
+            timer = 60
 
 def game_output():
     global shoot
@@ -161,10 +166,9 @@ def game_output():
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
-    screen.blit(Knight, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
+    screen.blit(knight_dir, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
     if shoot:
         screen.blit(trigger, (current_x + cam_x, current_y + cam_y))
-        print(current_x, current_y)
     pygame.display.flip()
 
 def draw_tile(tile, x, y):
