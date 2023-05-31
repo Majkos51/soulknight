@@ -1,6 +1,6 @@
 import pygame
 pygame.init()
-
+clock = pygame.time.Clock
 board = [
 [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
 [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
@@ -18,7 +18,15 @@ board = [
 [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
 [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
 [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
 [6, 6, 6, 7, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 8, 6, 6, 6],
+[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
 [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
 [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
 [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
@@ -30,6 +38,8 @@ board = [
 [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
 
+current = (-1, -1)
+
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
 BOARD_SIZE_Y = len(board)
@@ -40,7 +50,10 @@ dx = 0
 dy = 0
 speed = 4
 True_HP = 8
+mana = 160
 keys = None
+shoot = False
+click = None
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
 
@@ -50,6 +63,8 @@ K_night = pygame.image.load("data_Soul/Knight.png")
 Knight = pygame.transform.scale(K_night, (60, 60))
 Or_c = pygame.image.load("data_Soul/Orc.png")
 Orc = pygame.transform.scale(Or_c, (55, 55))
+t_rig = pygame.image.load("data_Soul/trigger.png")
+trigger = pygame.transform.scale(t_rig, (30, 30))
 
 # print(str(img.width) + ' ' + str(img.height))
 tiles = [
@@ -70,33 +85,66 @@ screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 
 
 def game_input():
+    global shoot
+    shoot = False
     global dx, dy
+    global mana
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mana -= 4
+            shoot = True
+
+        elif event.type == pygame.MOUSEMOTION:
+            on_mouse_motion(event)
+
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
+        dx = 0
+        dy = 0
         dx = -speed
     elif keys[pygame.K_a]:
+        dx = 0
+        dy = 0
         dx = speed
     elif keys[pygame.K_w]:
+        dx = 0
+        dy = 0
         dy = speed
     elif keys[pygame.K_s]:
+        dx = 0
+        dy = 0
         dy = -speed
     else:
         dx, dy = (0, 0)
 
 
+def on_mouse_motion(event):
+    global current, shoot, click
+    mx, my = event.pos
+    current = mx, my
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        click = pygame.time.get_ticks()
+
+
+
 def game_update():
     global cam_x, dx
     global cam_y, dy
+    global shoot, click
     cam_x += dx
     cam_y += dy
     global HP
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
+    ticks = pygame.time.get_ticks()
+    if #click != None and (ticks - click) % 1000 == 0:
+        shoot = False
+
 
 def game_output():
+    global shoot
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -105,10 +153,13 @@ def game_output():
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (150, 0, 0), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
-    pygame.draw.rect(screen, (0, 150, 150), (30, 60, 160, 15), border_radius=5)
+    pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
     screen.blit(Knight, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
     pygame.display.flip()
+    if shoot:
+        screen.blit(trigger, (300, 300))
+
 
 
 def draw_tile(tile, x, y):
