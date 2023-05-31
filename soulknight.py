@@ -38,11 +38,11 @@ board = [
 [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
 
-current = (-1, -1)
+
+
 current_x = -1
 current_y = -1
 timer = 60
-
 
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
@@ -126,8 +126,11 @@ def game_input():
 
 def on_mouse_down(event):
     global current, shoot, click, mana
-    mana -= 4
-    shoot = True
+    if mana > 0:
+        mana -= 4
+        shoot = True
+    elif mana <= 0:
+        shoot = False
     mx, my = event.pos
     mx -= cam_x
     my -= cam_y
@@ -138,7 +141,6 @@ def on_mouse_down(event):
     current = mx, my
     if event.type == pygame.MOUSEBUTTONDOWN:
         click = pygame.time.get_ticks()
-
 
 
 def game_update():
@@ -152,27 +154,40 @@ def game_update():
         timer -= 1
         if timer <= 0:
             shoot = False
-            timer = 60
+            timer = 30
 
+
+orc_lives = 55
 def game_output():
-    global shoot
+    global shoot, orc_lives
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
-    screen.blit(Orc, (cam_x + 800, cam_y + 350))
+
+    orc_x, orc_y = 800, 350
+    orc_cx, orc_cy = (cam_x + 800, cam_y + 350)
+    screen.blit(Orc, (orc_cx, orc_cy))
+
+    #healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (150, 0, 0), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
+
+    #trigger
     screen.blit(knight_dir, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
     if shoot:
-        screen.blit(trigger, (current_x + cam_x, current_y + cam_y))
-    pygame.display.flip()
+        screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
+
+    #healthbar enemy
+    pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
+    pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc_lives, 8), border_radius=5)
+
 
 def draw_tile(tile, x, y):
-    global cam_x
+    global cam_x, orc_x, orc_y
     global cam_y
     position = (x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y)
 
@@ -181,8 +196,15 @@ def draw_tile(tile, x, y):
 
     screen.blit(img, position, rectangle)
 
+def hit_enemy():
+    global orc_lives
+    if orc_x <= current_x >= orc_x + 55 and orc_y <= current_y >= orc_y + 55:
+        orc_lives -= 55/3
+
+
 
 while True:
     game_input()
     game_update()
     game_output()
+    pygame.display.flip()
