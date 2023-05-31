@@ -39,6 +39,8 @@ board = [
 ]
 
 current = (-1, -1)
+current_x = -1
+current_y = -1
 
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
@@ -48,7 +50,7 @@ cam_x = 0
 cam_y = 0
 dx = 0
 dy = 0
-speed = 4
+speed = 10
 True_HP = 8
 mana = 160
 keys = None
@@ -86,18 +88,14 @@ screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 
 def game_input():
     global shoot
-    shoot = False
     global dx, dy
     global mana
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            mana -= 4
-            shoot = True
+            on_mouse_down(event)
 
-        elif event.type == pygame.MOUSEMOTION:
-            on_mouse_motion(event)
 
 
     keys = pygame.key.get_pressed()
@@ -121,9 +119,17 @@ def game_input():
         dx, dy = (0, 0)
 
 
-def on_mouse_motion(event):
-    global current, shoot, click
+def on_mouse_down(event):
+    global current, shoot, click, mana
+    mana -= 4
+    shoot = True
     mx, my = event.pos
+    mx -= cam_x
+    my -= cam_y
+    global current_x
+    global current_y
+    current_x = mx
+    current_y = my
     current = mx, my
     if event.type == pygame.MOUSEBUTTONDOWN:
         click = pygame.time.get_ticks()
@@ -139,8 +145,8 @@ def game_update():
     global HP
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
     ticks = pygame.time.get_ticks()
-    if #click != None and (ticks - click) % 1000 == 0:
-        shoot = False
+    # if #click != None and (ticks - click) % 1000 == 0:
+    #     shoot = False
 
 
 def game_output():
@@ -156,11 +162,10 @@ def game_output():
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
     screen.blit(Knight, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
-    pygame.display.flip()
     if shoot:
-        screen.blit(trigger, (300, 300))
-
-
+        screen.blit(trigger, (current_x + cam_x, current_y + cam_y))
+        print(current_x, current_y)
+    pygame.display.flip()
 
 def draw_tile(tile, x, y):
     global cam_x
