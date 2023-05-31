@@ -156,6 +156,7 @@ def game_update():
             shoot = False
             timer = 30
 
+    hit_enemy()
 
 orc_lives = 55
 def game_output():
@@ -187,7 +188,7 @@ def game_output():
 
 
 def draw_tile(tile, x, y):
-    global cam_x, orc_x, orc_y
+    global cam_x
     global cam_y
     position = (x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y)
 
@@ -198,7 +199,7 @@ def draw_tile(tile, x, y):
 
 def hit_enemy():
     global orc_lives
-    if orc_x <= current_x >= orc_x + 55 and orc_y <= current_y >= orc_y + 55:
+    if 800 <= current_x <= 800 + 55 and 350 <= current_y <= 350 + 55:
         orc_lives -= 55/3
 
 
