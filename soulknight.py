@@ -38,8 +38,6 @@ board = [
 [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
 
-
-
 current_x = -1
 current_y = -1
 timer = 60
@@ -58,6 +56,7 @@ mana = 160
 keys = None
 shoot = False
 click = None
+Orc1 = True
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
 
@@ -67,8 +66,10 @@ K_night = pygame.image.load("data_Soul/Knight.png")
 Knight = pygame.transform.scale(K_night, (60, 60))
 B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
-Or_c = pygame.image.load("data_Soul/Orc.png")
+Or_c = pygame.image.load("data_Soul/Back_Orc.png")
 Orc = pygame.transform.scale(Or_c, (55, 55))
+D_ead = pygame.image.load("data_Soul/DeadOrc.png")
+DeadOrc = pygame.transform.scale(D_ead, (50, 50))
 t_rig = pygame.image.load("data_Soul/trigger.png")
 trigger = pygame.transform.scale(t_rig, (30, 30))
 
@@ -168,7 +169,10 @@ def game_output():
 
     orc_x, orc_y = 800, 350
     orc_cx, orc_cy = (cam_x + 800, cam_y + 350)
-    screen.blit(Orc, (orc_cx, orc_cy))
+    if Orc1:
+        screen.blit(Orc, (orc_cx, orc_cy))
+    elif not Orc1:
+        screen.blit(DeadOrc, (orc_cx, orc_cy))
 
     #healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
@@ -179,12 +183,14 @@ def game_output():
 
     #trigger
     screen.blit(knight_dir, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
+    pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), 120, 2)
     if shoot:
         screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
 
     #healthbar enemy
-    pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
-    pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc_lives, 8), border_radius=5)
+    if Orc1:
+        pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
+        pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc_lives, 8), border_radius=5)
 
 
 def draw_tile(tile, x, y):
@@ -198,11 +204,14 @@ def draw_tile(tile, x, y):
     screen.blit(img, position, rectangle)
 
 def hit_enemy():
-    global orc_lives
+    global orc_lives, shoot, current_x, current_y, Orc1
     if 800 <= current_x <= 800 + 55 and 350 <= current_y <= 350 + 55:
         orc_lives -= 55/3
-
-
+        shoot = False
+        current_x = -1 - cam_x
+        current_y = -1 - cam_y
+    if orc_lives <= 1:
+        Orc1 = False
 
 while True:
     game_input()
