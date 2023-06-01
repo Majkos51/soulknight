@@ -1,0 +1,5 @@
+    if mana > 0:
+        mana -= 4
+        shoot = True
+    elif mana <= 0:
+        shoot = False
