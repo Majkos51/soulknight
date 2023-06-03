@@ -1,45 +1,49 @@
 import pygame
+import random
+
 pygame.init()
 clock = pygame.time.Clock
 board = [
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 9, 3, 3, 3, 3, 0, 5, 5, 5, 5, 0, 3, 3, 3, 3,10, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 7, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 8, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
-[6, 6, 6, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,10, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 9, 3, 3, 3, 3, 0, 5, 5, 5, 5, 0, 3, 3, 3, 3, 10, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 7, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 8, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6],
+    [6, 6, 6, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
 
 current_x = -1
 current_y = -1
+movement_count = 1
+
 timer = 60
 
 SQUARE_SIZE = 50
@@ -51,8 +55,10 @@ cam_y = 0
 dx = 0
 dy = 0
 speed = 5
+random_movement_speed = 25
 True_HP = 8
 mana = 160
+orc_x, orc_y = 800, 350
 keys = None
 shoot = False
 click = None
@@ -66,14 +72,17 @@ K_night = pygame.image.load("data_Soul/Knight.png")
 Knight = pygame.transform.scale(K_night, (60, 60))
 B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
-Or_c = pygame.image.load("data_Soul/Back_Orc.png")
+Or_c = pygame.image.load("data_Soul/Orc.png")
 Orc = pygame.transform.scale(Or_c, (55, 55))
+B_ack_O = pygame.image.load("data_Soul/Back_Orc.png")
+Back_orc = pygame.transform.scale(B_ack_O, (55, 55))
 D_ead = pygame.image.load("data_Soul/DeadOrc.png")
 DeadOrc = pygame.transform.scale(D_ead, (50, 50))
 t_rig = pygame.image.load("data_Soul/trigger.png")
 trigger = pygame.transform.scale(t_rig, (30, 30))
 
 knight_dir = Knight
+orc_dir = Back_orc
 # print(str(img.width) + ' ' + str(img.height))
 tiles = [
     (1, 1),  # 0 = podlaha
@@ -82,7 +91,7 @@ tiles = [
     (1, 4),  # 3 = zed_j
     (0, 1),  # 4 = zed_z
     (1, 1),  # 5 = dvere ZATÍM JAKO PODLAHA
-    (14, 1), # 6 = void
+    (14, 1),  # 6 = void
     (0, 0),  # 7 = LevýHorníRoh
     (4, 0),  # 8 = PravýHorníRoh
     (0, 4),  # 9 = LevýDolníRoh
@@ -141,7 +150,8 @@ def on_mouse_down(event):
 
 
 def game_update():
-    global shoot, click, cam_y, dy, cam_x, dx, timer
+    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count
+    movement_count += 1
     cam_x += dx
     cam_y += dy
     global HP
@@ -149,33 +159,50 @@ def game_update():
 
 
 orc_lives = 55
+
+
 def game_output():
-    global shoot, orc_lives, timer
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
-
-    orc_x, orc_y = 800, 350
-    orc_cx, orc_cy = (cam_x + 800, cam_y + 350)
+    orc_cx, orc_cy = (cam_x + orc_x, cam_y + orc_y)
     if Orc1:
-        screen.blit(Orc, (orc_cx, orc_cy))
+        if movement_count % 50 == 0:
+            enemy_direction = random.choice(["left", "right", "up", "down"])
+            if enemy_direction == 'left':
+                orc_dir = Back_orc
+                orc_x -= random_movement_speed
+                orc_cx -= random_movement_speed
+            elif enemy_direction == 'right':
+                orc_dir = Orc
+                orc_x += random_movement_speed
+                orc_cx += random_movement_speed
+            elif enemy_direction == 'up':
+                orc_y -= random_movement_speed
+                orc_cy -= random_movement_speed
+            elif enemy_direction == 'down':
+                orc_y += random_movement_speed
+                orc_cy += random_movement_speed
+    if Orc1:
+        screen.blit(orc_dir, (orc_cx, orc_cy))
     elif not Orc1:
         screen.blit(DeadOrc, (orc_cx, orc_cy))
 
-    #healthbar_player
+
+
+    # healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (150, 0, 0), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
 
-    
     screen.blit(knight_dir, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
     pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), 120, 2)
-    
 
-    #trigger
+    # trigger
     if shoot:
         screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
         hit_enemy()
@@ -183,7 +210,7 @@ def game_output():
         if timer <= 0:
             shoot = False
             timer = 30
-    #healthbar enemy
+    # healthbar enemy
     if Orc1:
         pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
         pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc_lives, 8), border_radius=5)
@@ -201,14 +228,17 @@ def draw_tile(tile, x, y):
 
 
 def hit_enemy():
-    global orc_lives, shoot, current_x, current_y, Orc1, timer
-    if 800 <= current_x <= 800 + 55 and 350 <= current_y <= 350 + 55:
-        orc_lives -= 55/3
+    global orc_lives, shoot, current_x, current_y, Orc1, timer, mana
+    if orc_x <= current_x <= orc_x + 55 and orc_y <= current_y <= orc_y + 55:
+        orc_lives -= 55 / 3
         current_x = -1 - cam_x
         current_y = -1 - cam_y
-    if orc_lives <= 1:
-        Orc1 = False
-    
+    if Orc1:
+        if orc_lives <= 1:
+            mana += 10
+            Orc1 = False
+
+
 
 while True:
     game_input()
