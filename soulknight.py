@@ -42,7 +42,7 @@ board = [
 
 current_x = -1
 current_y = -1
-movement_count = 1
+movement_count = 0
 
 timer = 60
 
@@ -55,7 +55,7 @@ cam_y = 0
 dx = 0
 dy = 0
 speed = 5
-random_movement_speed = 25
+random_movement_speed = 3
 True_HP = 8
 mana = 160
 orc_x, orc_y = 800, 350
@@ -65,6 +65,7 @@ click = None
 Orc1 = True
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
+duration = random.randrange(0, 15)
 
 image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
 img = pygame.transform.scale(image, (19 * 50, 20 * 50))
@@ -151,46 +152,49 @@ def on_mouse_down(event):
 
 def game_update():
     global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count
-    movement_count += 1
+    movement_count += random.randrange(0, 20)
     cam_x += dx
     cam_y += dy
     global HP
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
-
+    if shoot:
+        timer -= 1
 
 orc_lives = 55
 
-
+enemy_direction = "left"
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,  movement_count
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
     orc_cx, orc_cy = (cam_x + orc_x, cam_y + orc_y)
     if Orc1:
-        if movement_count % 50 == 0:
+        if movement_count // 120 == 1:
+            
             enemy_direction = random.choice(["left", "right", "up", "down"])
-            if enemy_direction == 'left':
-                orc_dir = Back_orc
-                orc_x -= random_movement_speed
-                orc_cx -= random_movement_speed
-            elif enemy_direction == 'right':
-                orc_dir = Orc
-                orc_x += random_movement_speed
-                orc_cx += random_movement_speed
-            elif enemy_direction == 'up':
-                orc_y -= random_movement_speed
-                orc_cy -= random_movement_speed
-            elif enemy_direction == 'down':
-                orc_y += random_movement_speed
-                orc_cy += random_movement_speed
+            movement_count = 0
+
+        if enemy_direction == 'left':
+            orc_dir = Back_orc
+            orc_x -= random_movement_speed
+            orc_cx -= random_movement_speed               
+        elif enemy_direction == 'right':
+            orc_dir = Orc
+            orc_x += random_movement_speed
+            orc_cx += random_movement_speed
+        elif enemy_direction == 'up':
+            orc_y -= random_movement_speed
+            orc_cy -= random_movement_speed
+        elif enemy_direction == 'down':
+            orc_y += random_movement_speed
+            orc_cy += random_movement_speed
+            
     if Orc1:
         screen.blit(orc_dir, (orc_cx, orc_cy))
     elif not Orc1:
         screen.blit(DeadOrc, (orc_cx, orc_cy))
-
-
 
     # healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
@@ -205,11 +209,10 @@ def game_output():
     # trigger
     if shoot:
         screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
-        hit_enemy()
-        timer -= 1
         if timer <= 0:
             shoot = False
             timer = 30
+        hit_enemy()
     # healthbar enemy
     if Orc1:
         pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
@@ -234,7 +237,7 @@ def hit_enemy():
         current_x = -1 - cam_x
         current_y = -1 - cam_y
     if Orc1:
-        if orc_lives <= 1:
+        if orc_lives <= 0:
             mana += 10
             Orc1 = False
 
