@@ -66,8 +66,10 @@ keys = None
 shoot = False
 click = None
 Orc1 = True
+champ_not_selected = True
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
+font2 = pygame.font.Font('freesansbold.ttf', 35)
 duration = random.randrange(0, 15)
 
 image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
@@ -84,8 +86,10 @@ D_ead = pygame.image.load("data_Soul/DeadOrc.png")
 DeadOrc = pygame.transform.scale(D_ead, (50, 50))
 t_rig = pygame.image.load("data_Soul/trigger.png")
 trigger = pygame.transform.scale(t_rig, (30, 30))
-
-knight_dir = Knight
+wiz_ard = pygame.image.load("data_Soul/wizard.png")
+wizard_Left = pygame.transform.scale(wiz_ard, (60, 60))
+wizard_Right = pygame.transform.flip(wizard_Left, True, False)
+champion = Knight
 # print(str(img.width) + ' ' + str(img.height))
 tiles = [
     (1, 1),  # 0 = podlaha
@@ -104,8 +108,45 @@ tiles = [
 screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 
 
+def champ_select():
+    global champ_not_selected, champion
+    right_circle = 200
+    left_circle = 200
+    p, r = (0, 0)
+    sel_knight = pygame.transform.scale(Knight, (300, 300))
+    sel_wizard = pygame.transform.scale(wiz_ard, (300, 300))
+    champ__bg = pygame.image.load("data_Soul/champ_bg.jpg")
+    champ_bg = pygame.transform.scale(champ__bg, (2000, 1000))
+    pick_your_champ_text = font2.render("Pick your Champion", True, (0, 0, 0))
+    while champ_not_selected:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type == pygame.MOUSEMOTION:
+                p, r = event.pos
+                if p > SQUARE_SIZE * 17:
+                    right_circle = 250
+                    left_circle = 200
+                elif p < SQUARE_SIZE * 17:
+                    left_circle = 250
+                    right_circle = 200
+            if event.type == pygame.MOUSEBUTTONUP:
+                if p > SQUARE_SIZE * 17:
+                    champion = wizard_Right
+                    champ_not_selected = False
+                elif p < SQUARE_SIZE * 17:
+                    champion = Knight
+                    champ_not_selected = False
+        screen.blit(champ_bg, (0, 0))
+        pygame.draw.circle(screen, (0, 0, 0), (SQUARE_SIZE * 9 + 160, SQUARE_SIZE * 5 + 150), left_circle)
+        pygame.draw.circle(screen, (0, 0, 0), (SQUARE_SIZE * 20 + 160, SQUARE_SIZE * 5 + 150), right_circle)
+        screen.blit(sel_knight, (SQUARE_SIZE * 9, SQUARE_SIZE * 5))
+        screen.blit(sel_wizard, (SQUARE_SIZE * 20, SQUARE_SIZE * 5))
+        screen.blit(pick_your_champ_text, (SQUARE_SIZE * 14 + 10, SQUARE_SIZE * 2))
+        pygame.display.flip()
+
 def game_input():
-    global mana, knight_dir, dx, dy, shoot
+    global mana, champion, dx, dy, shoot
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -114,12 +155,18 @@ def game_input():
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
-        knight_dir = Knight
+        if champion == wizard_Right or champion == wizard_Left:
+            champion = wizard_Right
+        if champion == Knight or champion == Back_Knight:
+            champion = Knight
         dx = 0
         dy = 0
         dx = -speed
     elif keys[pygame.K_a]:
-        knight_dir = Back_Knight
+        if champion == wizard_Right or champion == wizard_Left:
+            champion = wizard_Left
+        if champion == Knight or champion == Back_Knight:
+            champion = Back_Knight
         dx = 0
         dy = 0
         dx = speed
@@ -153,14 +200,16 @@ def on_mouse_down(event):
 
 
 def game_update():
-    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count
+    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana
     cam_x += dx
     cam_y += dy
+    mana += 0.1
+    if mana >= 160:
+        mana = 160
     global HP
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
     if shoot:
         timer -= 1
-
 
 orc_lives = 55
 
@@ -212,7 +261,7 @@ def game_output():
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
 
-    screen.blit(knight_dir, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
+    screen.blit(champion, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
     pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), 120, 2)
 
     # trigger
@@ -256,6 +305,8 @@ def hit_enemy():
 
 
 while True:
+    if champ_not_selected:
+        champ_select()
     game_input()
     game_update()
     game_output()
