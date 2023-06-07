@@ -77,16 +77,15 @@ Knight = pygame.transform.scale(K_night, (60, 60))
 B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
 Or_c = pygame.image.load("data_Soul/Orc.png")
-Orc_Left = pygame.transform.scale(Or_c, (55, 55))
-B_ack_O = pygame.image.load("data_Soul/Back_Orc .png")
-Back_orc = pygame.transform.scale(B_ack_O, (55, 55))
+Orc_Right = pygame.transform.scale(Or_c, (55, 55))
+B_ack_O = pygame.image.load("data_Soul/Left_Orc.png")
+Orc_Left = pygame.transform.scale(B_ack_O, (55, 55))
 D_ead = pygame.image.load("data_Soul/DeadOrc.png")
 DeadOrc = pygame.transform.scale(D_ead, (50, 50))
 t_rig = pygame.image.load("data_Soul/trigger.png")
 trigger = pygame.transform.scale(t_rig, (30, 30))
 
 knight_dir = Knight
-orc_dir = Back_orc
 # print(str(img.width) + ' ' + str(img.height))
 tiles = [
     (1, 1),  # 0 = podlaha
@@ -175,26 +174,34 @@ def game_output():
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
     for orc in orcs:
+        orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
+        orc.image = Orc_Right
         if orc.alive:
+            # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
+            if orc.alive:
+                screen.blit(orc.image, (orc_cx, orc_cy))
             orc.timer += random.randrange(0, 20)
             if orc.timer >= 120:
                 orc.direction = random.choice(["left", "right", "up", "down"])
                 orc.timer = 0
             if orc.direction == 'left':
-                orc.image = Back_orc
+                orc.image = Orc_Left
                 orc.x -= random_movement_speed
             elif orc.direction == 'right':
-                orc.image = Orc_Left
+                orc.image = Orc_Right
                 orc.x += random_movement_speed
             elif orc.direction == 'up':
                 orc.y -= random_movement_speed
             elif orc.direction == 'down':
                 orc.y += random_movement_speed
-        orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
-        if orc.alive:
+        if not orc.alive:
+            orc.image = DeadOrc
             screen.blit(orc.image, (orc_cx, orc_cy))
-        else:
-            screen.blit(orc.image, (orc_cx, orc_cy))
+        # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
+        # if orc.alive:
+        #     screen.blit(orc.image, (orc_cx, orc_cy))
+        # else:
+        #     screen.blit(orc.image, (orc_cx, orc_cy))
 
 
 
@@ -218,8 +225,9 @@ def game_output():
     # healthbar enemy
     for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
-        pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
-        pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc.lives, 8), border_radius=5)
+        if orc.alive:
+            pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
+            pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc.lives, 8), border_radius=5)
 
 
 def draw_tile(tile, x, y):
@@ -236,14 +244,15 @@ def draw_tile(tile, x, y):
 def hit_enemy():
     for orc in orcs:
         global shoot, current_x, current_y, Orc1, timer, mana
-        if orc.x <= current_x <= orc.x + 55 and orc.y <= current_y <= orc.y + 55:
-            orc.lives -= 55 / 3
-            current_x = -1 - cam_x
-            current_y = -1 - cam_y
         if orc.alive:
-            if orc.lives <= 1:
-                mana += 10
-                Orc.alive = False
+            if orc.x <= current_x <= orc.x + 55 and orc.y <= current_y <= orc.y + 55:
+                orc.lives -= 55 / 3
+                current_x = -1 - cam_x
+                current_y = -1 - cam_y
+                if orc.lives < 5:
+                    mana += 10
+                    orc.alive = False
+
 
 
 while True:
