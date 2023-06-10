@@ -1,6 +1,7 @@
 import pygame
 import random
-from Orc import Orc
+import math
+from orc import Orc
 
 pygame.init()
 clock = pygame.time.Clock
@@ -45,6 +46,7 @@ orcs = [Orc(800, 350), Orc(600, 200), Orc(400, 250)]
 
 current_x = -1
 current_y = -1
+mx, my = 0, 0
 movement_count = 0
 
 timer = 60
@@ -70,7 +72,8 @@ champ_not_selected = True
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
 font2 = pygame.font.Font('freesansbold.ttf', 35)
-duration = random.randrange(0, 15)
+champ_pos_x, champ_pos_y = 35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30
+attack_rad = 120
 
 image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
 img = pygame.transform.scale(image, (19 * 50, 20 * 50))
@@ -183,21 +186,15 @@ def game_input():
 
 
 def on_mouse_down(event):
-    global current, shoot, click, mana
+    global current, shoot, click, mana, current_x, current_y, mx, my
     if mana > 0:
         mana -= 4
         shoot = True
     elif mana <= 0:
         shoot = False
     mx, my = event.pos
-    mx -= cam_x
-    my -= cam_y
-    global current_x
-    global current_y
-    current_x = mx
-    current_y = my
-    current = mx, my
-
+    current_x = mx - cam_x
+    current_y = my - cam_y
 
 def game_update():
     global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana
@@ -217,11 +214,12 @@ enemy_direction = "left"
 
 
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
+
     for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         orc.image = Orc_Right
@@ -261,8 +259,9 @@ def game_output():
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
 
-    screen.blit(champion, (35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30))
-    pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), 120, 2)
+    
+    screen.blit(champion, (champ_pos_x, champ_pos_y))
+    pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad, 2)
 
     # trigger
     if shoot:
@@ -291,9 +290,10 @@ def draw_tile(tile, x, y):
 
 
 def hit_enemy():
+    global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad
+    in_circle = math.sqrt((champ_pos_x - mx) ** 2 + (champ_pos_y - my) ** 2)
     for orc in orcs:
-        global shoot, current_x, current_y, Orc1, timer, mana
-        if orc.alive:
+        if orc.alive and in_circle < attack_rad:
             if orc.x <= current_x <= orc.x + 55 and orc.y <= current_y <= orc.y + 55:
                 orc.lives -= 55 / 3
                 current_x = -1 - cam_x
