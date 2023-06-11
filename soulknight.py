@@ -196,6 +196,7 @@ def on_mouse_down(event):
     current_x = mx - cam_x
     current_y = my - cam_y
 
+
 def game_update():
     global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana
     cam_x += dx
@@ -219,14 +220,13 @@ def game_output():
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
-
+    #orcs
     for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         orc.image = Orc_Right
         if orc.alive:
             # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
-            if orc.alive:
-                screen.blit(orc.image, (orc_cx, orc_cy))
+            screen.blit(orc.image, (orc_cx, orc_cy))
             orc.timer += random.randrange(0, 20)
             if orc.timer >= 120:
                 orc.direction = random.choice(["left", "right", "up", "down"])
@@ -241,6 +241,7 @@ def game_output():
                 orc.y -= random_movement_speed
             elif orc.direction == 'down':
                 orc.y += random_movement_speed
+            hit_wall(orc)
         if not orc.alive:
             orc.image = DeadOrc
             screen.blit(orc.image, (orc_cx, orc_cy))
@@ -278,12 +279,16 @@ def game_output():
             pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc.lives, 8), border_radius=5)
 
 
+#tile = boardtile
 def draw_tile(tile, x, y):
     global cam_x
     global cam_y
-    position = (x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y)
+    position = x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y
+    position_x, position_y = x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y
 
     tx, ty = tiles[tile]
+    #recatngle = tile_image
+
     rectangle = (tx * SQUARE_SIZE, ty * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
 
     screen.blit(img, position, rectangle)
@@ -303,6 +308,25 @@ def hit_enemy():
                     orc.alive = False
 
 
+def hit_wall(orc):
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if y * SQUARE_SIZE - 35 <= orc.y <= y * SQUARE_SIZE + SQUARE_SIZE - 25\
+                and x * SQUARE_SIZE - 35 <= orc.x <= x * SQUARE_SIZE + SQUARE_SIZE - 25:
+                if orc.direction == 'left' and (board[y][x] == 4 or board[y][x] == 7 or board[y][x] == 9) and x * SQUARE_SIZE + SQUARE_SIZE - 35 >= orc.x:
+                    orc.direction = 'right'
+                    orc.timer = 0
+                elif orc.direction == 'right' and (board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and x * SQUARE_SIZE - 25 <= orc.x:
+                    orc.direction = 'left'
+                    orc.timer = 0
+                elif orc.direction == 'up' and (board[y][x] == 1 or board[y][x] == 7 or board[y][x] == 8) and y * SQUARE_SIZE + SQUARE_SIZE - 35 >= orc.y:
+                    orc.direction = 'down'
+                    orc.timer = 0
+                elif orc.direction == 'down' and (board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and y * SQUARE_SIZE - 25 <= orc.y:
+                    orc.direction = 'up'
+                    orc.timer = 0
+
+
 
 while True:
     if champ_not_selected:
@@ -311,3 +335,4 @@ while True:
     game_update()
     game_output()
     pygame.display.flip()
+
