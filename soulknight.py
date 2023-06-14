@@ -1,10 +1,10 @@
 import pygame
 import random
 import math
-from Orc import Orc
+from orc import Orc
 
 pygame.init()
-clock = pygame.time.Clock
+clock = pygame.time.Clock()
 board = [
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
@@ -17,7 +17,7 @@ board = [
     [6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6],
-    [6, 6, 6, 6, 6, 6, 9, 3, 3, 3, 3, 0, 5, 5, 5, 5, 0, 3, 3, 3, 3, 10, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 9, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 0, 0, 0, 0, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
@@ -60,7 +60,7 @@ cam_y = 0
 dx = 0
 dy = 0
 speed = 3
-random_movement_speed = 0
+orc_speed = 3
 True_HP = 8
 mana = 160
 mana_cost = 4
@@ -77,40 +77,44 @@ font2 = pygame.font.Font('freesansbold.ttf', 35)
 champ_pos_x, champ_pos_y = 35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30
 attack_rad = 120
 
+screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
+
 image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
-img = pygame.transform.scale(image, (19 * 50, 20 * 50))
+img = pygame.transform.scale(image, (19 * 50, 20 * 50)).convert_alpha()
 K_night = pygame.image.load("data_Soul/Knight.png")
 Knight = pygame.transform.scale(K_night, (60, 60))
 B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
-Or_c = pygame.image.load("data_Soul/Orc.png")
+Or_c = pygame.image.load("data_Soul/Orc.png").convert_alpha()
 Orc_Right = pygame.transform.scale(Or_c, (55, 55))
-B_ack_O = pygame.image.load("data_Soul/Left_Orc.png")
+B_ack_O = pygame.image.load("data_Soul/Back_Orc.png").convert_alpha()
 Orc_Left = pygame.transform.scale(B_ack_O, (55, 55))
-D_ead = pygame.image.load("data_Soul/DeadOrc.png")
+D_ead = pygame.image.load("data_Soul/DeadOrc.png").convert_alpha()
 DeadOrc = pygame.transform.scale(D_ead, (50, 50))
-t_rig = pygame.image.load("data_Soul/trigger.png")
+t_rig = pygame.image.load("data_Soul/trigger.png").convert_alpha()
 trigger = pygame.transform.scale(t_rig, (30, 30))
-wiz_ard = pygame.image.load("data_Soul/wizard.png")
+wiz_ard = pygame.image.load("data_Soul/wizard.png").convert_alpha()
 wizard_Left = pygame.transform.scale(wiz_ard, (60, 60))
 wizard_Right = pygame.transform.flip(wizard_Left, True, False)
 champion = Knight
 # print(str(img.width) + ' ' + str(img.height))
+wall_s = (1, 4)
+floor = (1, 1)
+
 tiles = [
     (1, 1),  # 0 = podlaha
     (1, 0),  # 1 = zed_s
     (4, 1),  # 2 = zed_v
     (1, 4),  # 3 = zed_j
     (0, 1),  # 4 = zed_z
-    (1, 1),  # 5 = dvere ZATÍM JAKO PODLAHA
+    wall_s,  # 5 = dvere ZATÍM JAKO PODLAHA
     (14, 1),  # 6 = void
     (0, 0),  # 7 = LevýHorníRoh
     (4, 0),  # 8 = PravýHorníRoh
     (0, 4),  # 9 = LevýDolníRoh
     (4, 4),  # 10 = PravýDolníRoh
+    floor
 ]
-
-screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 
 
 def champ_select():
@@ -155,42 +159,59 @@ def champ_select():
         pygame.display.flip()
 
 
+move = True
+def knight_wall():
+    print(champ_pos_x, champ_pos_y)
+    global speed, dx, dy, move
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if board[y][x] == 3:
+                if x * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_x - cam_x>= x * SQUARE_SIZE:
+                    print('f')
+                    if y * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_y - cam_y >= y * SQUARE_SIZE:
+                        move = False
+                        print(move)
+
+
 def game_input():
-    global mana, champion, dx, dy, shoot
+    global mana, champion, dx, dy, shoot, move
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             on_mouse_down(event)
 
+    knight_wall()
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_d]:
-        if champion == wizard_Right or champion == wizard_Left:
-            champion = wizard_Right
-        if champion == Knight or champion == Back_Knight:
-            champion = Knight
-        dx = 0
-        dy = 0
-        dx = -speed
-    elif keys[pygame.K_a]:
-        if champion == wizard_Right or champion == wizard_Left:
-            champion = wizard_Left
-        if champion == Knight or champion == Back_Knight:
-            champion = Back_Knight
-        dx = 0
-        dy = 0
-        dx = speed
-    elif keys[pygame.K_w]:
-        dx = 0
-        dy = 0
-        dy = speed
-    elif keys[pygame.K_s]:
-        dx = 0
-        dy = 0
-        dy = -speed
+    if move:
+        if keys[pygame.K_d]:
+            if champion == wizard_Right or champion == wizard_Left:
+                champion = wizard_Right
+            if champion == Knight or champion == Back_Knight:
+                champion = Knight
+            dx = 0
+            dy = 0
+            dx = -speed
+        elif keys[pygame.K_a]:
+            if champion == wizard_Right or champion == wizard_Left:
+                champion = wizard_Left
+            if champion == Knight or champion == Back_Knight:
+                champion = Back_Knight
+            dx = 0
+            dy = 0
+            dx = speed
+        elif keys[pygame.K_w]:
+            dx = 0
+            dy = 0
+            dy = speed
+        elif keys[pygame.K_s]:
+            dx = 0
+            dy = 0
+            dy = -speed
+        else:
+            dx, dy = (0, 0)
     else:
         dx, dy = (0, 0)
-
 
 def on_mouse_down(event):
     global current, shoot, click, mana, current_x, current_y, mx, my
@@ -241,14 +262,14 @@ def game_output():
                 orc.timer = 0
             if orc.direction == 'left':
                 orc.image = Orc_Left
-                orc.x -= random_movement_speed
+                orc.x -= orc_speed
             elif orc.direction == 'right':
                 orc.image = Orc_Right
-                orc.x += random_movement_speed
+                orc.x += orc_speed
             elif orc.direction == 'up':
-                orc.y -= random_movement_speed
+                orc.y -= orc_speed
             elif orc.direction == 'down':
-                orc.y += random_movement_speed
+                orc.y += orc_speed
             hit_wall(orc)
         if not orc.alive:
             orc.image = DeadOrc
@@ -273,7 +294,7 @@ def game_output():
     if shoot:
         if timer <= 0:
             shoot = False
-            timer = 30
+            timer = 15
         hit_enemy()
 
 
@@ -293,36 +314,48 @@ def draw_tile(tile, x, y):
     position_x, position_y = x * SQUARE_SIZE + cam_x, y * SQUARE_SIZE + cam_y
 
     tx, ty = tiles[tile]
+
     # recatngle = tile_image
 
     rectangle = (tx * SQUARE_SIZE, ty * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
 
     screen.blit(img, position, rectangle)
 
-shot = True
+dead = []
 def hit_enemy():
-    global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot
+    global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot, orcs, door
     in_circle = math.sqrt((champ_pos_x - mx) ** 2 + (champ_pos_y - my) ** 2)
     for orc in orcs:
         if orc.alive and in_circle < attack_rad:
-            if orc.x <= current_x <= orc.x + 55 and orc.y <= current_y <= orc.y + 55:
-                if shot:
-                    orc.lives -= champ_dmg
-                    shot = False
-                screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
+            if orc.x - 10 <= current_x <= orc.x + 65 and orc.y - 10 <= current_y <= orc.y + 65:
+                orc.lives -= champ_dmg
+                if shoot:
+                    screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
                 if timer <= 0:
                     shoot = False
-                    timer = 30
-                if not shoot:
-                    current_x = -1 - cam_x
-                    current_y = -1 - cam_y
-                    shot = True
+                    timer = 15
+                current_x = -1 - cam_x
+                current_y = -1 - cam_y
                 if orc.lives < 5:
                     mana += 10
                     orc.alive = False
-                    shot = True
+                    dead.append(1)
+                    if len(dead) >= 3:
+                        open_door()
+
             else:
                 screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
+
+
+def open_door():
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if y == 11 and 16 >= x >= 11 and board[y][x] == 3:
+                board[y][x] = 0
+
+
+
+
 
 def hit_wall(orc):
     for y in range(BOARD_SIZE_Y):
@@ -354,3 +387,4 @@ while True:
     game_update()
     game_output()
     pygame.display.flip()
+    clock.tick(30)
