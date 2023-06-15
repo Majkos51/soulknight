@@ -70,6 +70,9 @@ keys = None
 shoot = False
 click = None
 Orc1 = True
+ability = None
+on_cooldown = False
+ability_cooldown = 300
 champ_not_selected = True
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
@@ -97,6 +100,8 @@ trigger = pygame.transform.scale(t_rig, (30, 30))
 wiz_ard = pygame.image.load("data_Soul/wizard.png").convert_alpha()
 wizard_Left = pygame.transform.scale(wiz_ard, (60, 60))
 wizard_Right = pygame.transform.flip(wizard_Left, True, False)
+wizab = pygame.image.load("data_Soul/thunder_wizard.png").convert_alpha()
+ability = pygame.transform.scale(wizab, (70, 70))
 champion = Knight
 # print(str(img.width) + ' ' + str(img.height))
 wall_s = (1, 4)
@@ -184,7 +189,7 @@ def knight_wall():
                         move_down = True
 
 def game_input():
-    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right, knight_dir
+    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right, knight_dir, on_cooldown, set_alpha
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -238,6 +243,9 @@ def game_input():
             move_left = True
         else:
             dx, dy = 0, 0
+    elif keys[pygame.K_1]:
+        on_cooldown = True
+        set_alpha = 100
     else:
         dx, dy = 0, 0
 
@@ -273,11 +281,14 @@ enemy_direction = "left"
 
 
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
             draw_tile(board[y][x], x, y)
+    if on_cooldown:
+        pygame.draw.circle(screen, (0, 50, 200), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad)
+
     # orcs
     for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
@@ -309,12 +320,27 @@ def game_output():
         # else:
         #     screen.blit(orc.image, (orc_cx, orc_cy))
 
+
+
     # healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (150, 0, 0), (30, 30, 160, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
+
+    # ABILITY
+    if not on_cooldown:
+        set_alpha = 255
+        ability_cooldown = 300
+    if on_cooldown:
+        set_alpha = 100
+        ability_cooldown -= 1
+        if ability_cooldown == 0:
+            on_cooldown = False
+    ability.set_alpha(set_alpha)
+    pygame.draw.rect(screen, (80, 80, 80), (1600, 700, 70, 70))
+    screen.blit(ability, (1600, 700))
 
     screen.blit(champion, (champ_pos_x, champ_pos_y))
     pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad, 2)
@@ -325,7 +351,14 @@ def game_output():
             shoot = False
             timer = 15
         hit_enemy()
-
+    for orc in orcs:
+        in_circle = math.sqrt((champ_pos_x + cam_x - orc.x) ** 2 + (champ_pos_y + cam_y - orc.y) ** 2)
+        if orc.alive and in_circle < attack_rad:
+            if on_cooldown:
+                orc.lives -= 5 / 30
+                mana -= 0.5 / 30
+                if orc.lives < 1:
+                    orc.alive = False
 
     # healthbar enemy
     for orc in orcs:
