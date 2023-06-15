@@ -87,7 +87,7 @@ B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
 Or_c = pygame.image.load("data_Soul/Orc.png").convert_alpha()
 Orc_Right = pygame.transform.scale(Or_c, (55, 55))
-B_ack_O = pygame.image.load("data_Soul/Back_Orc.png").convert_alpha()
+B_ack_O = pygame.image.load("data_Soul/Left_Orc.png").convert_alpha()
 Orc_Left = pygame.transform.scale(B_ack_O, (55, 55))
 D_ead = pygame.image.load("data_Soul/DeadOrc.png").convert_alpha()
 DeadOrc = pygame.transform.scale(D_ead, (50, 50))
@@ -113,7 +113,6 @@ tiles = [
     (4, 0),  # 8 = PravýHorníRoh
     (0, 4),  # 9 = LevýDolníRoh
     (4, 4),  # 10 = PravýDolníRoh
-    floor
 ]
 
 
@@ -159,22 +158,28 @@ def champ_select():
         pygame.display.flip()
 
 
-move = True
+move_up = True
+move_left = True
+move_right = True
+move_down = True
 def knight_wall():
-    print(champ_pos_x, champ_pos_y)
-    global speed, dx, dy, move
+    global speed, dx, dy, move_up, move_down, move_left, move_right
     for y in range(BOARD_SIZE_Y):
         for x in range(BOARD_SIZE_X):
-            if board[y][x] == 3:
-                if x * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_x - cam_x>= x * SQUARE_SIZE:
-                    print('f')
-                    if y * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_y - cam_y >= y * SQUARE_SIZE:
-                        move = False
-                        print(move)
+            if x * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_x - cam_x >= x * SQUARE_SIZE:
+                if y * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_y - cam_y >= y * SQUARE_SIZE:
+                    if board[y][x] == 1 or board[y][x] == 7 or board[y][x] == 8:
+                        move_up = False
+                    elif board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10:
+                        move_down = False
+                    elif board[y][x] == 4 or board[y][x] == 7 or board[y][x] == 9:
+                        move_left = False
+                    elif board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10:
+                        move_right = False
 
 
 def game_input():
-    global mana, champion, dx, dy, shoot, move
+    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -183,8 +188,8 @@ def game_input():
 
     knight_wall()
     keys = pygame.key.get_pressed()
-    if move:
-        if keys[pygame.K_d]:
+    if keys[pygame.K_d]:
+        if move_right:
             if champion == wizard_Right or champion == wizard_Left:
                 champion = wizard_Right
             if champion == Knight or champion == Back_Knight:
@@ -192,7 +197,11 @@ def game_input():
             dx = 0
             dy = 0
             dx = -speed
-        elif keys[pygame.K_a]:
+            move_up = True
+        else:
+            dx, dy = 0, 0
+    elif keys[pygame.K_a]:
+        if move_left:
             if champion == wizard_Right or champion == wizard_Left:
                 champion = wizard_Left
             if champion == Knight or champion == Back_Knight:
@@ -200,18 +209,30 @@ def game_input():
             dx = 0
             dy = 0
             dx = speed
-        elif keys[pygame.K_w]:
+            move_right = True
+        else:
+            dx, dy = 0, 0
+    elif keys[pygame.K_w]:
+        if move_up:
+
             dx = 0
             dy = 0
             dy = speed
-        elif keys[pygame.K_s]:
+            move_down = True
+            
+        else:
+            dx, dy = 0, 0
+    elif keys[pygame.K_s]:
+        if move_down:
             dx = 0
             dy = 0
             dy = -speed
+            move_left = True
         else:
-            dx, dy = (0, 0)
+            dx, dy = 0, 0
     else:
-        dx, dy = (0, 0)
+        dx, dy = 0, 0
+
 
 def on_mouse_down(event):
     global current, shoot, click, mana, current_x, current_y, mx, my
