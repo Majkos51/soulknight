@@ -112,7 +112,7 @@ tiles = [
     (0, 0),  # 7 = LevýHorníRoh
     (4, 0),  # 8 = PravýHorníRoh
     (0, 4),  # 9 = LevýDolníRoh
-    (4, 4),  # 10 = PravýDolníRoh
+    (4, 4)  # 10 = PravýDolníRoh
 ]
 
 
@@ -176,7 +176,11 @@ def knight_wall():
                         move_left = False
                     elif board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10:
                         move_right = False
-
+                    else:
+                        move_up = True
+                        move_left = True
+                        move_right = True
+                        move_down = True
 
 def game_input():
     global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right
@@ -219,7 +223,7 @@ def game_input():
             dy = 0
             dy = speed
             move_down = True
-            
+
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_s]:
