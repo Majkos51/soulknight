@@ -75,6 +75,7 @@ color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
 font2 = pygame.font.Font('freesansbold.ttf', 35)
 champ_pos_x, champ_pos_y = 35 * SQUARE_SIZE // 2 - 35, 17 * SQUARE_SIZE // 2 - 30
+knight_dir = 2
 attack_rad = 120
 
 screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
@@ -166,15 +167,15 @@ def knight_wall():
     global speed, dx, dy, move_up, move_down, move_left, move_right
     for y in range(BOARD_SIZE_Y):
         for x in range(BOARD_SIZE_X):
-            if x * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_x - cam_x >= x * SQUARE_SIZE:
-                if y * SQUARE_SIZE + SQUARE_SIZE >= champ_pos_y - cam_y >= y * SQUARE_SIZE:
-                    if board[y][x] == 1 or board[y][x] == 7 or board[y][x] == 8:
+            if x * SQUARE_SIZE + SQUARE_SIZE - 35 >= champ_pos_x - cam_x >= x * SQUARE_SIZE - 24:
+                if y * SQUARE_SIZE + SQUARE_SIZE - 40 >= champ_pos_y - cam_y >= y * SQUARE_SIZE - 25:
+                    if board[y][x] == 1 or (board[y][x] == 7 or board[y][x] == 8) and knight_dir == 1:
                         move_up = False
-                    elif board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10:
+                    elif board[y][x] == 3 or (board[y][x] == 9 or board[y][x] == 10) and knight_dir == 3:
                         move_down = False
-                    elif board[y][x] == 4 or board[y][x] == 7 or board[y][x] == 9:
+                    elif board[y][x] == 4 or (board[y][x] == 7 or board[y][x] == 9) and knight_dir == 4:
                         move_left = False
-                    elif board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10:
+                    elif board[y][x] == 2 or (board[y][x] == 8 or board[y][x] == 10) and knight_dir == 2:
                         move_right = False
                     else:
                         move_up = True
@@ -183,7 +184,7 @@ def knight_wall():
                         move_down = True
 
 def game_input():
-    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right
+    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right, knight_dir
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -193,6 +194,7 @@ def game_input():
     knight_wall()
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
+        knight_dir = 2
         if move_right:
             if champion == wizard_Right or champion == wizard_Left:
                 champion = wizard_Right
@@ -202,9 +204,11 @@ def game_input():
             dy = 0
             dx = -speed
             move_up = True
+
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_a]:
+        knight_dir = 4
         if move_left:
             if champion == wizard_Right or champion == wizard_Left:
                 champion = wizard_Left
@@ -217,16 +221,16 @@ def game_input():
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_w]:
+        knight_dir = 1
         if move_up:
-
             dx = 0
             dy = 0
             dy = speed
             move_down = True
-
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_s]:
+        knight_dir = 3
         if move_down:
             dx = 0
             dy = 0
