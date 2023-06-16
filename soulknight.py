@@ -59,7 +59,7 @@ cam_x = 0
 cam_y = 0
 dx = 0
 dy = 0
-speed = 3
+speed = 5
 orc_speed = 3
 True_HP = 8
 mana = 160
@@ -169,19 +169,24 @@ move_left = True
 move_right = True
 move_down = True
 def knight_wall():
-    global speed, dx, dy, move_up, move_down, move_left, move_right
+    global speed, dx, dy, move_up, move_down, move_left, move_right, passed
     for y in range(BOARD_SIZE_Y):
         for x in range(BOARD_SIZE_X):
-            if x * SQUARE_SIZE + SQUARE_SIZE - 35 >= champ_pos_x - cam_x >= x * SQUARE_SIZE - 24:
-                if y * SQUARE_SIZE + SQUARE_SIZE - 40 >= champ_pos_y - cam_y >= y * SQUARE_SIZE - 25:
-                    if board[y][x] == 1 or (board[y][x] == 7 or board[y][x] == 8) and knight_dir == 1:
+            if x * SQUARE_SIZE + SQUARE_SIZE - 30 >= champ_pos_x - cam_x >= x * SQUARE_SIZE - 30:
+                if y * SQUARE_SIZE + SQUARE_SIZE - 30 >= champ_pos_y - cam_y >= y * SQUARE_SIZE - 30:
+                    if (board[y][x] == 1 or ((board[y][x] == 7 or board[y][x] == 8) and knight_dir == 1))\
+                            and y * SQUARE_SIZE + SQUARE_SIZE - 35 >= champ_pos_y - cam_y:
                         move_up = False
-                    elif board[y][x] == 3 or (board[y][x] == 9 or board[y][x] == 10) and knight_dir == 3:
+                    elif (board[y][x] == 3 or ((board[y][x] == 9 or board[y][x] == 10) and knight_dir == 3))\
+                        and champ_pos_y - cam_y >= y * SQUARE_SIZE - 25:
                         move_down = False
-                    elif board[y][x] == 4 or (board[y][x] == 7 or board[y][x] == 9) and knight_dir == 4:
+                    elif (board[y][x] == 4 or ((board[y][x] == 7 or board[y][x] == 9) and knight_dir == 4))\
+                            and x * SQUARE_SIZE + SQUARE_SIZE  - 35 >= champ_pos_x - cam_x:
                         move_left = False
-                    elif board[y][x] == 2 or (board[y][x] == 8 or board[y][x] == 10) and knight_dir == 2:
+                    elif (board[y][x] == 2 or ((board[y][x] == 8 or board[y][x] == 10) and knight_dir == 2))\
+                            and x * SQUARE_SIZE - 25 <= champ_pos_x - cam_x:
                         move_right = False
+
                     else:
                         move_up = True
                         move_left = True
@@ -189,7 +194,7 @@ def knight_wall():
                         move_down = True
 
 def game_input():
-    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right, knight_dir, on_cooldown, set_alpha
+    global mana, champion, dx, dy, shoot, move_up, move_down, move_left, move_right, knight_dir, on_cooldown, set_alpha, passed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
@@ -208,7 +213,7 @@ def game_input():
             dx = 0
             dy = 0
             dx = -speed
-            move_up = True
+            move_left = True
 
         else:
             dx, dy = 0, 0
@@ -223,6 +228,8 @@ def game_input():
             dy = 0
             dx = speed
             move_right = True
+
+
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_w]:
@@ -232,6 +239,7 @@ def game_input():
             dy = 0
             dy = speed
             move_down = True
+
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_s]:
@@ -240,7 +248,8 @@ def game_input():
             dx = 0
             dy = 0
             dy = -speed
-            move_left = True
+            move_up = True
+
         else:
             dx, dy = 0, 0
     elif keys[pygame.K_1]:
@@ -280,16 +289,8 @@ orc_lives = 55
 enemy_direction = "left"
 
 
-def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana
-    screen.fill((0, 0, 0))
-    for y in range(0, BOARD_SIZE_Y):
-        for x in range(0, BOARD_SIZE_X):
-            draw_tile(board[y][x], x, y)
-    if on_cooldown:
-        pygame.draw.circle(screen, (0, 50, 200), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad)
-
-    # orcs
+def draw_orcs():
+    global orcs
     for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         orc.image = Orc_Right
@@ -314,6 +315,22 @@ def game_output():
         if not orc.alive:
             orc.image = DeadOrc
             screen.blit(orc.image, (orc_cx, orc_cy))
+
+
+def game_output():
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana
+    screen.fill((0, 0, 0))
+    for y in range(0, BOARD_SIZE_Y):
+        for x in range(0, BOARD_SIZE_X):
+            draw_tile(board[y][x], x, y)
+            close_door(x, y)
+    if on_cooldown:
+        pygame.draw.circle(screen, (0, 50, 200), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad)
+
+    # orcs
+    new_wave()
+    draw_orcs()
+
         # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         # if orc.alive:
         #     screen.blit(orc.image, (orc_cx, orc_cy))
@@ -383,6 +400,7 @@ def draw_tile(tile, x, y):
 
     screen.blit(img, position, rectangle)
 
+
 dead = []
 def hit_enemy():
     global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot, orcs, door
@@ -402,7 +420,7 @@ def hit_enemy():
                     mana += 10
                     orc.alive = False
                     dead.append(1)
-                    if len(dead) >= 3:
+                    if len(dead) >= len(orcs):
                         open_door()
 
             else:
@@ -415,29 +433,49 @@ def open_door():
             if y == 11 and 16 >= x >= 11 and board[y][x] == 3:
                 board[y][x] = 0
 
+wave = False
+wave2 = True
+def close_door(x, y):
+    global wave, wave2, board
+    if y == 20 and 11 <= x <= 16:
+        if y * SQUARE_SIZE < champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE and wave2:
+            wave = True
+            for i in range(BOARD_SIZE_Y):
+                for j in range(BOARD_SIZE_X):
+                    if i == 20 and 11 <= j <= 16:
+                        board[i][j] = 1
+            print(board)
 
 
+passed = False
+why = None
+def new_wave():
+    global orcs, dead, wave, wave2, passed
+    if wave:
+        dead = []
+        orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 28 * SQUARE_SIZE), Orc(17 * SQUARE_SIZE, 31 * SQUARE_SIZE)]
+        wave = False
+        wave2 = False
 
 
 def hit_wall(orc):
     for y in range(BOARD_SIZE_Y):
         for x in range(BOARD_SIZE_X):
-            if y * SQUARE_SIZE - 35 <= orc.y <= y * SQUARE_SIZE + SQUARE_SIZE - 25 \
-                    and x * SQUARE_SIZE - 35 <= orc.x <= x * SQUARE_SIZE + SQUARE_SIZE - 25:
+            if y * SQUARE_SIZE - 30 <= orc.y <= y * SQUARE_SIZE + SQUARE_SIZE - 30 \
+                    and x * SQUARE_SIZE - 30 <= orc.x <= x * SQUARE_SIZE + SQUARE_SIZE - 30:
                 if orc.direction == 'left' and (board[y][x] == 4 or board[y][x] == 7 or board[y][
-                    x] == 9) and x * SQUARE_SIZE + SQUARE_SIZE - 35 >= orc.x:
+                    x] == 9) and x * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.x:
                     orc.direction = 'right'
                     orc.timer = 0
-                elif orc.direction == 'right' and (
-                        board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and x * SQUARE_SIZE - 25 <= orc.x:
+                elif orc.direction == 'right' and (board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and x * SQUARE_SIZE - 20 <= orc.x:
                     orc.direction = 'left'
                     orc.timer = 0
                 elif orc.direction == 'up' and (board[y][x] == 1 or board[y][x] == 7 or board[y][
-                    x] == 8) and y * SQUARE_SIZE + SQUARE_SIZE - 35 >= orc.y:
+                    x] == 8) and y * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.y:
                     orc.direction = 'down'
                     orc.timer = 0
                 elif orc.direction == 'down' and (
-                        board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and y * SQUARE_SIZE - 25 <= orc.y:
+                        board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and y * SQUARE_SIZE - 23 <= orc.y:
                     orc.direction = 'up'
                     orc.timer = 0
 
