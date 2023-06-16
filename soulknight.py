@@ -488,3 +488,5 @@ while True:
     game_output()
     pygame.display.flip()
     clock.tick(30)
+
+#TODO: Orc dealing damage, bos, more rooms
