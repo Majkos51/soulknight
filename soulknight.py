@@ -42,7 +42,9 @@ board = [
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
 
-orcs = [Orc(800, 350), Orc(600, 200), Orc(400, 250)]
+orcs = [Orc(900, 250), Orc(750, 400), Orc(400, 450), Orc(550, 300), Orc(750, 470)]
+for orc in orcs:
+    orc.direction = random.choice(["right", "left", "up", "down"])
 
 current_x = -1
 current_y = -1
@@ -61,7 +63,7 @@ cam_y = 0
 dx = 0
 dy = 0
 speed = 5
-orc_speed = 3
+orc_speed = 3.5
 True_HP = 8
 mana = 160
 mana_cost = 4
@@ -342,7 +344,7 @@ def draw_orcs():
             # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
             screen.blit(orc.image, (orc_cx, orc_cy))
             orc.timer += random.randrange(0, 20)
-            if orc.timer >= 120:
+            if orc.timer >= 240:
                 orc.direction = random.choice(["left", "right", "up", "down"])
                 orc.timer = 0
             if orc.direction == 'left':
@@ -365,7 +367,8 @@ def new_wave():
     global orcs, dead, wave, wave_not_repeat
     if wave:
         dead = []
-        orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 28 * SQUARE_SIZE), Orc(17 * SQUARE_SIZE, 31 * SQUARE_SIZE)]
+        orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 22 * SQUARE_SIZE),
+                Orc(17 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(15 * SQUARE_SIZE, 23 * SQUARE_SIZE), Orc(18.5 * SQUARE_SIZE, 20 * SQUARE_SIZE)]
         wave = False
         wave_not_repeat = True
 
@@ -421,7 +424,7 @@ def orcs_damage():
     global orcs, orc_cx, orc_cy, True_HP, wait
     for orc in orcs:
         if wait > 30:
-            if orc.x + cam_x - 30 < champ_pos_x < orc.x + cam_x + 30 and orc.y + cam_y - 30 < champ_pos_y < orc.y + cam_y + 30:
+            if orc.x + cam_x - 50 < champ_pos_x < orc.x + cam_x + 50 and orc.y + cam_y - 50 < champ_pos_y < orc.y + cam_y + 50 and orc.alive:
                 True_HP -= 1
                 wait = 0
         if True_HP <= 0:
