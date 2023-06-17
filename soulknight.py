@@ -70,6 +70,7 @@ mana_cost = 4
 champ_dmg = 55/3
 orc_cx = 0
 orc_cy = 0
+
 move_up = True
 move_left = True
 move_right = True
@@ -85,6 +86,7 @@ on_cooldown = False
 ability_cooldown = 300
 champ_not_selected = True
 dead = []
+
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
 font2 = pygame.font.Font('freesansbold.ttf', 35)
