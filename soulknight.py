@@ -50,6 +50,7 @@ mx, my = 0, 0
 movement_count = 0
 
 timer = 60
+wait = 30
 
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
@@ -65,7 +66,8 @@ True_HP = 8
 mana = 160
 mana_cost = 4
 champ_dmg = 55/3
-orc_x, orc_y = 800, 350
+orc_cx = 0
+orc_cy = 0
 move_up = True
 move_left = True
 move_right = True
@@ -278,7 +280,7 @@ def game_input():
 
 
 def game_update():
-    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana
+    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana, wait
     cam_x += dx
     cam_y += dy
     mana += 0.1
@@ -288,6 +290,7 @@ def game_update():
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
     if shoot:
         timer -= 1
+    wait += 1
 
 
 orc_lives = 55
@@ -311,13 +314,23 @@ def draw_tile(tile, x, y):
     screen.blit(img, position, rectangle)
 
 
-def new_wave():
-    global orcs, dead, wave, wave_not_repeat
-    if wave:
-        dead = []
-        orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 28 * SQUARE_SIZE), Orc(17 * SQUARE_SIZE, 31 * SQUARE_SIZE)]
-        wave = False
-        wave_not_repeat = True
+def open_door():
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if y == 11 and 16 >= x >= 11 and board[y][x] == 3:
+                board[y][x] = 0
+
+
+def close_door(x, y):
+    global wave, wave_not_repeat, board
+    if y == 20 and 11 <= x <= 16:
+        if y * SQUARE_SIZE < champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE and not wave_not_repeat:
+            wave = True
+            for i in range(BOARD_SIZE_Y):
+                for j in range(BOARD_SIZE_X):
+                    if i == 20 and 11 <= j <= 16:
+                        board[i][j] = 1
+            print(board)
 
 
 def draw_orcs():
@@ -348,6 +361,37 @@ def draw_orcs():
             screen.blit(orc.image, (orc_cx, orc_cy))
 
 
+def new_wave():
+    global orcs, dead, wave, wave_not_repeat
+    if wave:
+        dead = []
+        orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 28 * SQUARE_SIZE), Orc(17 * SQUARE_SIZE, 31 * SQUARE_SIZE)]
+        wave = False
+        wave_not_repeat = True
+
+
+def hit_wall(orc):
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if y * SQUARE_SIZE - 30 <= orc.y <= y * SQUARE_SIZE + SQUARE_SIZE - 30 \
+                    and x * SQUARE_SIZE - 30 <= orc.x <= x * SQUARE_SIZE + SQUARE_SIZE - 30:
+                if orc.direction == 'left' and (board[y][x] == 4 or board[y][x] == 7 or board[y][
+                    x] == 9) and x * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.x:
+                    orc.direction = 'right'
+                    orc.timer = 0
+                elif orc.direction == 'right' and (board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and x * SQUARE_SIZE - 20 <= orc.x:
+                    orc.direction = 'left'
+                    orc.timer = 0
+                elif orc.direction == 'up' and (board[y][x] == 1 or board[y][x] == 7 or board[y][
+                    x] == 8) and y * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.y:
+                    orc.direction = 'down'
+                    orc.timer = 0
+                elif orc.direction == 'down' and (
+                        board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and y * SQUARE_SIZE - 23 <= orc.y:
+                    orc.direction = 'up'
+                    orc.timer = 0
+
+
 def hit_enemy():
     global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot, orcs, door
     in_circle = math.sqrt((champ_pos_x - mx) ** 2 + (champ_pos_y - my) ** 2)
@@ -373,50 +417,19 @@ def hit_enemy():
                 screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
 
 
-def open_door():
-    for y in range(BOARD_SIZE_Y):
-        for x in range(BOARD_SIZE_X):
-            if y == 11 and 16 >= x >= 11 and board[y][x] == 3:
-                board[y][x] = 0
-
-
-def close_door(x, y):
-    global wave, wave_not_repeat, board
-    if y == 20 and 11 <= x <= 16:
-        if y * SQUARE_SIZE < champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE and not wave_not_repeat:
-            wave = True
-            for i in range(BOARD_SIZE_Y):
-                for j in range(BOARD_SIZE_X):
-                    if i == 20 and 11 <= j <= 16:
-                        board[i][j] = 1
-            print(board)
-
-
-def hit_wall(orc):
-    for y in range(BOARD_SIZE_Y):
-        for x in range(BOARD_SIZE_X):
-            if y * SQUARE_SIZE - 30 <= orc.y <= y * SQUARE_SIZE + SQUARE_SIZE - 30 \
-                    and x * SQUARE_SIZE - 30 <= orc.x <= x * SQUARE_SIZE + SQUARE_SIZE - 30:
-                if orc.direction == 'left' and (board[y][x] == 4 or board[y][x] == 7 or board[y][
-                    x] == 9) and x * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.x:
-                    orc.direction = 'right'
-                    orc.timer = 0
-                elif orc.direction == 'right' and (board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and x * SQUARE_SIZE - 20 <= orc.x:
-                    orc.direction = 'left'
-                    orc.timer = 0
-                elif orc.direction == 'up' and (board[y][x] == 1 or board[y][x] == 7 or board[y][
-                    x] == 8) and y * SQUARE_SIZE + SQUARE_SIZE - 38 >= orc.y:
-                    orc.direction = 'down'
-                    orc.timer = 0
-                elif orc.direction == 'down' and (
-                        board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and y * SQUARE_SIZE - 23 <= orc.y:
-                    orc.direction = 'up'
-                    orc.timer = 0
-
+def orcs_damage():
+    global orcs, orc_cx, orc_cy, True_HP, wait
+    for orc in orcs:
+        if wait > 30:
+            if orc.x + cam_x - 30 < champ_pos_x < orc.x + cam_x + 30 and orc.y + cam_y - 30 < champ_pos_y < orc.y + cam_y + 30:
+                True_HP -= 1
+                wait = 0
+        if True_HP <= 0:
+            exit()
 
 
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -437,7 +450,8 @@ def game_output():
 
     # healthbar_player
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
-    pygame.draw.rect(screen, (150, 0, 0), (30, 30, 160, 20), border_radius=5)
+    if True_HP >= 0:
+        pygame.draw.rect(screen, (150, 0, 0), (30, 30, True_HP * 20, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
@@ -464,6 +478,7 @@ def game_output():
             shoot = False
             timer = 15
         hit_enemy()
+    #ability
     for orc in orcs:
         in_circle = math.sqrt((champ_pos_x + cam_x - orc.x) ** 2 + (champ_pos_y + cam_y - orc.y) ** 2)
         if orc.alive and in_circle < attack_rad:
@@ -472,15 +487,15 @@ def game_output():
                 mana -= 0.5 / 30
                 if orc.lives < 1:
                     orc.alive = False
+        #orc deal damage
+        if orc.alive:
+            orcs_damage()
 
-    # healthbar enemy
-    for orc in orcs:
+        # healthbar enemy
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         if orc.alive:
             pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
             pygame.draw.rect(screen, (150, 0, 0), (orc_cx, orc_cy - 16, orc.lives, 8), border_radius=5)
-
-
 
 
 
@@ -492,5 +507,7 @@ while True:
     game_output()
     pygame.display.flip()
     clock.tick(30)
+
+
 
 #TODO: Orc dealing damage, bos, more rooms
