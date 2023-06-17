@@ -510,4 +510,4 @@ while True:
 
 
 
-#TODO: Orc dealing damage, bos, more rooms
+#TODO: Bos, more rooms, ability, more champs
