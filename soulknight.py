@@ -133,6 +133,7 @@ move_left = True
 move_right = True
 move_down = True
 wave = True
+wave_go = False
 keys = None
 shoot = False
 click = None
@@ -141,7 +142,9 @@ ability = None
 on_cooldown = False
 ability_cooldown = 300
 champ_not_selected = True
+boss_show = False
 dead = []
+wave_num = 1
 
 color_bg = (180, 180, 180)
 font = pygame.font.Font('freesansbold.ttf', 18)
@@ -155,23 +158,25 @@ screen = pygame.display.set_mode((35 * SQUARE_SIZE, 17 * SQUARE_SIZE))
 image = pygame.image.load("data_Soul/dungeon_tilesTILE16x16.png")
 img = pygame.transform.scale(image, (19 * 50, 20 * 50)).convert_alpha()
 K_night = pygame.image.load("data_Soul/Knight.png")
-Knight = pygame.transform.scale(K_night, (60, 60))
+Knight = pygame.transform.scale(K_night, (60, 60)).convert_alpha()
 B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
-Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60))
-Or_c = pygame.image.load("data_Soul/Orc.png").convert_alpha()
-Orc_Right = pygame.transform.scale(Or_c, (55, 55))
-B_ack_O = pygame.image.load("data_Soul/Left_Orc.png").convert_alpha()
-Orc_Left = pygame.transform.scale(B_ack_O, (55, 55))
-D_ead = pygame.image.load("data_Soul/DeadOrc.png").convert_alpha()
-DeadOrc = pygame.transform.scale(D_ead, (50, 50))
-t_rig = pygame.image.load("data_Soul/trigger.png").convert_alpha()
-trigger = pygame.transform.scale(t_rig, (30, 30))
-wiz_ard = pygame.image.load("data_Soul/wizard.png").convert_alpha()
-wizard_Left = pygame.transform.scale(wiz_ard, (60, 60))
+Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60)).convert_alpha()
+Or_c = pygame.image.load("data_Soul/Orc.png")
+Orc_Right = pygame.transform.scale(Or_c, (55, 55)).convert_alpha()
+B_ack_O = pygame.image.load("data_Soul/Left_Orc.png")
+Orc_Left = pygame.transform.scale(B_ack_O, (55, 55)).convert_alpha()
+D_ead = pygame.image.load("data_Soul/DeadOrc.png")
+DeadOrc = pygame.transform.scale(D_ead, (50, 50)).convert_alpha()
+t_rig = pygame.image.load("data_Soul/trigger.png")
+trigger = pygame.transform.scale(t_rig, (30, 30)).convert_alpha()
+wiz_ard = pygame.image.load("data_Soul/wizard.png")
+wizard_Left = pygame.transform.scale(wiz_ard, (60, 60)).convert_alpha()
 wizard_Right = pygame.transform.flip(wizard_Left, True, False)
-wizab = pygame.image.load("data_Soul/thunder_wizard.png").convert_alpha()
-ability = pygame.transform.scale(wizab, (70, 70))
+wizab = pygame.image.load("data_Soul/thunder_wizard.png")
+ability = pygame.transform.scale(wizab, (70, 70)).convert_alpha()
 champion = Knight
+bos_s = pygame.image.load("data_Soul/boss.png")
+boss = pygame.transform.scale(bos_s, (100, 100)).convert_alpha()
 # print(str(img.width) + ' ' + str(img.height))
 wall_s = (1, 4)
 floor = (1, 1)
@@ -374,7 +379,6 @@ def draw_tile(tile, x, y):
     screen.blit(img, position, rectangle)
 
 
-wave_num = 1
 def open_door():
     global wave_num
     for y in range(BOARD_SIZE_Y):
@@ -395,7 +399,7 @@ def open_door():
 def close_door(x, y):
     global wave, board, wave_go
     if y == 20 and 11 <= x <= 15 and wave_num == 2 and wave:
-        if y * SQUARE_SIZE + SQUARE_SIZE - 30 < champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE:
+        if y * SQUARE_SIZE + SQUARE_SIZE - 38 < champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE:
             wave_go = True
             for i in range(BOARD_SIZE_Y):
                 for j in range(BOARD_SIZE_X):
@@ -403,7 +407,7 @@ def close_door(x, y):
                         board[i][j] = 1
 
     elif x == 27 and 26 <= y <= 30 and wave_num == 3 and wave:
-        if y * SQUARE_SIZE < champ_pos_y - cam_y < y * SQUARE_SIZE + SQUARE_SIZE and x * SQUARE_SIZE + SQUARE_SIZE - 30 < champ_pos_x - cam_x:
+        if y * SQUARE_SIZE < champ_pos_y - cam_y < y * SQUARE_SIZE + SQUARE_SIZE and x * SQUARE_SIZE + SQUARE_SIZE - 43 < champ_pos_x - cam_x:
             wave_go = True
             for i in range(BOARD_SIZE_Y):
                 for j in range(BOARD_SIZE_X):
@@ -411,7 +415,7 @@ def close_door(x, y):
                         board[i][j] = 4
 
     elif y == 15 and 33 <= x <= 37 and wave_num == 4 and wave:
-        if y * SQUARE_SIZE - 30 > champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE:
+        if y * SQUARE_SIZE - 22 > champ_pos_y - cam_y and x * SQUARE_SIZE < champ_pos_x - cam_x < x * SQUARE_SIZE + SQUARE_SIZE:
             wave_go = True
             for i in range(BOARD_SIZE_Y):
                 for j in range(BOARD_SIZE_X):
@@ -446,9 +450,9 @@ def draw_orcs():
             orc.image = DeadOrc
             screen.blit(orc.image, (orc_cx, orc_cy))
 
-wave_go = False
+
 def new_wave():
-    global orcs, dead, wave, wave_num, wave_go
+    global orcs, dead, wave, wave_num, wave_go, boss_show
     if wave_go:
         dead = []
         if wave_num == 2:
@@ -460,11 +464,12 @@ def new_wave():
                     Orc(31 * SQUARE_SIZE, 33 * SQUARE_SIZE), Orc(29 * SQUARE_SIZE, 28 * SQUARE_SIZE),
                     Orc(33 * SQUARE_SIZE, 34 * SQUARE_SIZE)]
 
+        if wave_num == 4:
+            boss_show = True
+
+
         wave = False
         wave_go = False
-
-
-
 
 
 def hit_wall(orc):
@@ -528,7 +533,7 @@ def orcs_damage():
 
 
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -541,6 +546,8 @@ def game_output():
     new_wave()
     draw_orcs()
 
+    if boss_show:
+        screen.blit(boss, (30 * SQUARE_SIZE + cam_x, 12 * SQUARE_SIZE + cam_y))
         # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         # if orc.alive:
         #     screen.blit(orc.image, (orc_cx, orc_cy))
