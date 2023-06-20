@@ -180,7 +180,7 @@ wizab = pygame.image.load("data_Soul/thunder_wizard.png")
 ability = pygame.transform.scale(wizab, (70, 70)).convert_alpha()
 champion = Knight
 bos_s = pygame.image.load("data_Soul/boss.png")
-boss = pygame.transform.scale(bos_s, (500, 500)).convert_alpha()
+boss = pygame.transform.scale(bos_s, (200, 200)).convert_alpha()
 # print(str(img.width) + ' ' + str(img.height))
 wall_s = (1, 4)
 floor = (1, 1)
@@ -549,14 +549,29 @@ def boss_movement():
     if timer_boss <= 0:
         boss_dir = random.randrange(1, 5)
         timer_boss = 160
-    
-    for y in BOARD_SIZE_Y:
-        for x in BOARD_SIZE_X:
-            if 
-    
+
+    for y in range(BOARD_SIZE_Y):
+        for x in range(BOARD_SIZE_X):
+            if x * SQUARE_SIZE <= boss_x <= x * SQUARE_SIZE + SQUARE_SIZE\
+                and y * SQUARE_SIZE <= boss_y <= y * SQUARE_SIZE + SQUARE_SIZE:
+                if (board[y][x] == 1 or board[y][x] == 7 or board[y][x] == 8) and boss_dir == 1:
+                    boss_dir = 3
+                    timer_boss = 160
+                elif (board[y][x] == 2 or board[y][x] == 8 or board[y][x] == 10) and boss_dir == 2:
+                    boss_dir = 4
+                    timer_boss = 160
+                elif (board[y][x] == 3 or board[y][x] == 9 or board[y][x] == 10) and boss_dir == 3:
+                    boss_dir = 1
+                    timer_boss = 160
+                elif (board[y][x] == 4 or board[y][x] == 7 or board[y][x] == 9) and boss_dir == 4:
+                    boss_dir = 2
+                    timer_boss = 160
+
+
+boss_HP = 16
 def game_output():
     global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
-        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y
+        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -572,6 +587,9 @@ def game_output():
     if boss_show:
         boss_movement()
         screen.blit(boss, (boss_x + cam_x, boss_y + cam_y))
+        #healthbar boss
+        pygame.draw.rect(screen, (80, 80, 80), (boss_x + cam_x, boss_y + 20 + cam_y, 160, 20), border_radius=5)
+        pygame.draw.rect(screen, (150, 0, 0), (boss_x + cam_x, boss_y + 20 + cam_y, boss_HP * 10, 20), border_radius=5)
         # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         # if orc.alive:
         #     screen.blit(orc.image, (orc_cx, orc_cy))
