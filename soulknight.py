@@ -99,7 +99,7 @@ board = [
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
      6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
 ]
-orcs = [Orc(900, 250), Orc(750, 400), Orc(400, 450), Orc(550, 300), Orc(750, 470)]
+orcs = [Orc(900, 250)]
 for orc in orcs:
     orc.direction = random.choice(["right", "left", "up", "down"])
 
@@ -114,6 +114,10 @@ wait = 30
 SQUARE_SIZE = 50
 BOARD_SIZE_X = len(board[0])
 BOARD_SIZE_Y = len(board)
+
+boss_x, boss_y = 30 * SQUARE_SIZE, 12 * SQUARE_SIZE
+timer_boss = 160
+boss_dir = 2
 
 cam_x = 0
 cam_y = 0
@@ -176,7 +180,7 @@ wizab = pygame.image.load("data_Soul/thunder_wizard.png")
 ability = pygame.transform.scale(wizab, (70, 70)).convert_alpha()
 champion = Knight
 bos_s = pygame.image.load("data_Soul/boss.png")
-boss = pygame.transform.scale(bos_s, (100, 100)).convert_alpha()
+boss = pygame.transform.scale(bos_s, (500, 500)).convert_alpha()
 # print(str(img.width) + ' ' + str(img.height))
 wall_s = (1, 4)
 floor = (1, 1)
@@ -341,11 +345,8 @@ def game_input():
         dx, dy = 0, 0
 
 
-
-
-
 def game_update():
-    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana, wait
+    global shoot, click, cam_y, dy, cam_x, dx, timer, movement_count, mana, wait, timer_boss
     cam_x += dx
     cam_y += dy
     mana += 0.1
@@ -355,6 +356,8 @@ def game_update():
     HP = font.render(str(True_HP) + "/8", True, (0, 0, 0))
     if shoot:
         timer -= 1
+    if boss_show:
+        timer_boss -= random.randrange(0, 20)
     wait += 1
     print(wave_num)
 
@@ -456,13 +459,10 @@ def new_wave():
     if wave_go:
         dead = []
         if wave_num == 2:
-            orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(16 * SQUARE_SIZE, 22 * SQUARE_SIZE),
-                    Orc(17 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(15 * SQUARE_SIZE, 23 * SQUARE_SIZE), Orc(18.5 * SQUARE_SIZE, 20 * SQUARE_SIZE)]
+            orcs = [Orc(13 * SQUARE_SIZE, 25 * SQUARE_SIZE)]
 
         if wave_num == 3:
-            orcs = [Orc(30 * SQUARE_SIZE, 25 * SQUARE_SIZE), Orc(33 * SQUARE_SIZE, 30 * SQUARE_SIZE),
-                    Orc(31 * SQUARE_SIZE, 33 * SQUARE_SIZE), Orc(29 * SQUARE_SIZE, 28 * SQUARE_SIZE),
-                    Orc(33 * SQUARE_SIZE, 34 * SQUARE_SIZE)]
+            orcs = [Orc(30 * SQUARE_SIZE, 25 * SQUARE_SIZE)]
 
         if wave_num == 4:
             boss_show = True
@@ -532,8 +532,31 @@ def orcs_damage():
             exit()
 
 
+def boss_movement():
+    global timer_boss, boss_x, boss_y, boss_dir
+    if boss_dir == 1:
+        boss_y -= 3
+
+    if boss_dir == 2:
+        boss_x += 3
+
+    if boss_dir == 4:
+        boss_x -= 3
+
+    if boss_dir == 3:
+        boss_y += 3
+
+    if timer_boss <= 0:
+        boss_dir = random.randrange(1, 5)
+        timer_boss = 160
+    
+    for y in BOARD_SIZE_Y:
+        for x in BOARD_SIZE_X:
+            if 
+    
 def game_output():
-    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration, movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show
+    global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
+        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -547,7 +570,8 @@ def game_output():
     draw_orcs()
 
     if boss_show:
-        screen.blit(boss, (30 * SQUARE_SIZE + cam_x, 12 * SQUARE_SIZE + cam_y))
+        boss_movement()
+        screen.blit(boss, (boss_x + cam_x, boss_y + cam_y))
         # orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         # if orc.alive:
         #     screen.blit(orc.image, (orc_cx, orc_cy))
@@ -616,4 +640,4 @@ while True:
 
 
 
-#TODO: Bos, more rooms, ability, more champs
+#TODO: Bos shooting missiles/ occasionally rockets or some stronger more damaging stuff, change of speed
