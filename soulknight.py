@@ -606,7 +606,7 @@ def boss_attack():
             catch = True
 
 
-
+stop = False
 def game_output():
     global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
         movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP, True_HP, wait
@@ -623,7 +623,10 @@ def game_output():
     draw_orcs()
 
     if boss_show:
-        True_HP = 8
+        global stop
+        if not stop:
+            True_HP = 8
+        stop = True
         boss_movement()
         screen.blit(boss, (boss_x + cam_x, boss_y + cam_y))
         #healthbar boss
@@ -688,6 +691,7 @@ def game_output():
 
 
         # healthbar enemy
+    for orc in orcs:
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
         if orc.alive:
             pygame.draw.rect(screen, (80, 80, 80), (orc_cx, orc_cy - 16, 55, 8), border_radius=5)
