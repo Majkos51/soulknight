@@ -119,6 +119,7 @@ BOARD_SIZE_Y = len(board)
 boss_x, boss_y = 30 * SQUARE_SIZE, 12 * SQUARE_SIZE
 timer_boss = 160
 boss_dir = 2
+boss_speed = 3
 
 cam_x = 0
 cam_y = 0
@@ -182,6 +183,8 @@ ability = pygame.transform.scale(wizab, (70, 70)).convert_alpha()
 champion = Knight
 bos_s = pygame.image.load("data_Soul/boss.png")
 boss = pygame.transform.scale(bos_s, (200, 200)).convert_alpha()
+fire_bal = pygame.image.load("data_Soul/fireball.png")
+fireball =  pygame.transform.scale(fire_bal, (50, 50)).convert_alpha()
 # print(str(img.width) + ' ' + str(img.height))
 wall_s = (1, 4)
 floor = (1, 1)
@@ -545,26 +548,23 @@ def orcs_damage():
             if orc.x + cam_x - 50 < champ_pos_x < orc.x + cam_x + 50 and orc.y + cam_y - 50 < champ_pos_y < orc.y + cam_y + 50 and orc.alive:
                 True_HP -= 1
                 wait = 0
-            if boss_x + cam_x - 50 < champ_pos_x < boss_x + cam_x + 50 and boss_y + cam_y - 50 < champ_pos_y <boss_y + cam_y + 50:
-                True_HP -= 1
-
         if True_HP <= 0:
-            exit()
+                exit()
 
 
 def boss_movement():
     global timer_boss, boss_x, boss_y, boss_dir
     if boss_dir == 1:
-        boss_y -= 3
+        boss_y -= boss_speed
 
     if boss_dir == 2:
-        boss_x += 3
+        boss_x += boss_speed
 
     if boss_dir == 4:
-        boss_x -= 3
+        boss_x -= boss_speed
 
     if boss_dir == 3:
-        boss_y += 3
+        boss_y += boss_speed
 
     if timer_boss <= 0:
         boss_dir = random.randrange(1, 5)
@@ -588,10 +588,28 @@ def boss_movement():
                     timer_boss = 160
 
 
+att_timer = 640
+dfx, dfy = 0, 0
+duration = 500
+catch = True
+def boss_attack():
+    global boss_speed, att_timer, dfx, dfy, fireball, duration, catch
+    att_timer -= random.randrange(0,80)
+    if att_timer <= 0:
+        duration -= 1
+        if catch:
+            dfx = boss_x
+            catch = False
+        screen.blit(fireball, (dfx + cam_x, dfy + cam_y))
+        if duration <= 0:
+            att_timer = 640
+            catch = True
+
+
 
 def game_output():
     global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
-        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP
+        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP, True_HP, wait
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -605,6 +623,7 @@ def game_output():
     draw_orcs()
 
     if boss_show:
+        True_HP = 8
         boss_movement()
         screen.blit(boss, (boss_x + cam_x, boss_y + cam_y))
         #healthbar boss
@@ -658,6 +677,15 @@ def game_output():
         #orc deal damage
         if orc.alive:
             orcs_damage()
+
+        #boss deal damage
+    if wait > 30:
+        if boss_x + cam_x < champ_pos_x < boss_x + cam_x + 200 and boss_y + cam_y < champ_pos_y < boss_y + cam_y + 200:
+            True_HP -= 2
+            wait = 0
+    if True_HP <= 0:
+        exit()
+
 
         # healthbar enemy
         orc_cx, orc_cy = (cam_x + orc.x, cam_y + orc.y)
