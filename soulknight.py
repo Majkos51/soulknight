@@ -169,7 +169,7 @@ B_ack_Knight = pygame.image.load("data_Soul/Back_Knight.png")
 Back_Knight = pygame.transform.scale(B_ack_Knight, (60, 60)).convert_alpha()
 Or_c = pygame.image.load("data_Soul/Orc.png")
 Orc_Right = pygame.transform.scale(Or_c, (55, 55)).convert_alpha()
-B_ack_O = pygame.image.load("data_Soul/Left_Orc.png")
+B_ack_O = pygame.image.load("data_Soul/Back_Orc.png")
 Orc_Left = pygame.transform.scale(B_ack_O, (55, 55)).convert_alpha()
 D_ead = pygame.image.load("data_Soul/DeadOrc.png")
 DeadOrc = pygame.transform.scale(D_ead, (50, 50)).convert_alpha()
@@ -180,6 +180,9 @@ wizard_Left = pygame.transform.scale(wiz_ard, (60, 60)).convert_alpha()
 wizard_Right = pygame.transform.flip(wizard_Left, True, False)
 wizab = pygame.image.load("data_Soul/thunder_wizard.png")
 ability = pygame.transform.scale(wizab, (70, 70)).convert_alpha()
+knightab = pygame.image.load("data_Soul/armor.png")
+armor = pygame.transform.scale(knightab, (70, 70))
+abilita = ability
 champion = Knight
 bos_s = pygame.image.load("data_Soul/boss.png")
 boss = pygame.transform.scale(bos_s, (200, 200)).convert_alpha()
@@ -205,7 +208,7 @@ tiles = [
 
 
 def champ_select():
-    global champ_not_selected, champion, attack_rad, mana_cost, champ_dmg, speed
+    global champ_not_selected, champion, attack_rad, mana_cost, champ_dmg, speed, projectile, abilita, bolt
     right_circle = 200
     left_circle = 200
     p, r = (0, 0)
@@ -231,11 +234,13 @@ def champ_select():
                     champion = wizard_Right
                     attack_rad += 100
                     mana_cost += 12
-                    champ_dmg = 55/2
+                    champ_dmg = 55 / 2
+                    projectile = bolt
                     champ_not_selected = False
                 elif p < SQUARE_SIZE * 17:
                     champion = Knight
                     speed += 2
+                    abilita = armor
                     champ_not_selected = False
         screen.blit(champ_bg, (0, 0))
         pygame.draw.circle(screen, (0, 0, 0), (SQUARE_SIZE * 9 + 160, SQUARE_SIZE * 5 + 150), left_circle)
@@ -521,8 +526,6 @@ def hit_enemy():
                         wave = True
                         dead = []
                         wave_num += 1
-            else:
-                screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
 
     if boss_x <= current_x <= boss_x + 200 and boss_y <= current_y <= boss_y + 200:
         boss_HP -= 1
@@ -588,28 +591,38 @@ def boss_movement():
                     timer_boss = 160
 
 
+fireballz = [(0, 0), (0, 0), (0, 0), (0, 0)]
+directions = [(10, 0), (0, 10), (-10, 0), (0, -10)]
 att_timer = 640
-dfx, dfy = 0, 0
+
 duration = 500
 catch = True
 def boss_attack():
-    global boss_speed, att_timer, dfx, dfy, fireball, duration, catch
-    att_timer -= random.randrange(0,80)
+    global boss_speed, att_timer, dfx, dfy, fireball, duration, catch, boss_x, boss_y
+    att_timer -= random.randrange(0, 80)
+    print(att_timer)
     if att_timer <= 0:
+        for i in range(len(directions)):
+            if catch:
+                fireballz[i] = boss_x, boss_y
+            fireballz[i] = fireballz[i][0] + directions[i][0], fireballz[i][1] + directions[i][1]
+
+            screen.blit(fireball, (fireballz[i][0] + cam_x, fireballz[i][1] + cam_y))
+        catch = False
+
         duration -= 1
-        if catch:
-            dfx = boss_x
-            catch = False
-        screen.blit(fireball, (dfx + cam_x, dfy + cam_y))
+
         if duration <= 0:
             att_timer = 640
             catch = True
+            duration = 500
 
-
+bonus = 0
+K_Armor = False
 stop = False
 def game_output():
     global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
-        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP, True_HP, wait
+        movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP, True_HP, wait, bonus, add, K_Armor
     screen.fill((0, 0, 0))
     for y in range(0, BOARD_SIZE_Y):
         for x in range(0, BOARD_SIZE_X):
@@ -639,9 +652,14 @@ def game_output():
         #     screen.blit(orc.image, (orc_cx, orc_cy))
 
     # healthbar_player
+
+    if bonus <= 0:
+        health_color = (150, 0, 0)
+    if bonus > 0:
+        health_color = (50, 50, 50)
     pygame.draw.rect(screen, (80, 80, 80), (30, 30, 160, 20), border_radius=5)
     if True_HP >= 0:
-        pygame.draw.rect(screen, (150, 0, 0), (30, 30, True_HP * 20, 20), border_radius=5)
+        pygame.draw.rect(screen, (health_color), (30, 30, True_HP * 20, 20), border_radius=5)
     pygame.draw.rect(screen, (80, 80, 80), (30, 60, 160, 15), border_radius=5)
     pygame.draw.rect(screen, (0, 150, 150), (30, 60, mana, 15), border_radius=5)
     screen.blit(HP, (100, 31))
@@ -655,40 +673,47 @@ def game_output():
         ability_cooldown -= 1
         if ability_cooldown == 0:
             on_cooldown = False
-    ability.set_alpha(set_alpha)
+    abilita.set_alpha(set_alpha)
     pygame.draw.rect(screen, (80, 80, 80), (1600, 700, 70, 70))
-    screen.blit(ability, (1600, 700))
+    screen.blit(abilita, (1600, 700))
 
     screen.blit(champion, (champ_pos_x, champ_pos_y))
     pygame.draw.circle(screen, (30, 30, 30), (35 * SQUARE_SIZE // 2 - 5, 17 * SQUARE_SIZE // 2), attack_rad, 2)
 
+    if K_Armor:
+        health_color = (30, 30, 30)
+        True_HP += 3
+        bonus = 3
+        K_Armor = False
     # trigger
     if shoot:
         if timer <= 0:
             shoot = False
             timer = 15
+
         hit_enemy()
-    #ability
+    # ability
     for orc in orcs:
-        in_circle = math.sqrt((champ_pos_x + cam_x - orc.x) ** 2 + (champ_pos_y + cam_y - orc.y) ** 2)
+        in_circle = math.sqrt((champ_pos_x - (orc.x + cam_x)) ** 2 + (champ_pos_y - (orc.y + cam_y)) ** 2)
         if orc.alive and in_circle < attack_rad:
             if on_cooldown:
                 orc.lives -= 5 / 30
-                mana -= 0.5 / 30
+                mana -= 0.45
                 if orc.lives < 1:
                     orc.alive = False
         #orc deal damage
         if orc.alive:
             orcs_damage()
 
-        #boss deal damage
-    if wait > 30:
-        if boss_x + cam_x < champ_pos_x < boss_x + cam_x + 200 and boss_y + cam_y < champ_pos_y < boss_y + cam_y + 200:
-            True_HP -= 2
-            wait = 0
-    if True_HP <= 0:
-        exit()
-
+    #boss deal damage
+    if boss_show:
+        if wait > 30:
+            if boss_x + cam_x < champ_pos_x < boss_x + cam_x + 200 and boss_y + cam_y < champ_pos_y < boss_y + cam_y + 200:
+                True_HP -= 2
+                wait = 0
+        if True_HP <= 0:
+            exit()
+        boss_attack()
 
         # healthbar enemy
     for orc in orcs:
