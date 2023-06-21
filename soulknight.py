@@ -107,6 +107,7 @@ current_x = -1
 current_y = -1
 mx, my = 0, 0
 movement_count = 0
+boss_HP = 16
 
 timer = 60
 wait = 30
@@ -495,7 +496,7 @@ def hit_wall(orc):
 
 
 def hit_enemy():
-    global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot, orcs, door, wave_num, dead, wave
+    global shoot, current_x, current_y, Orc1, timer, mana, mx, my, champ_pos_x, champ_pos_y, attack_rad, shot, orcs, door, wave_num, dead, wave, boss_HP, boss_x, boss_y
     in_circle = math.sqrt((champ_pos_x + 30 - mx) ** 2 + (champ_pos_y + 30 - my) ** 2)
     for orc in orcs:
         if orc.alive and in_circle < attack_rad:
@@ -520,6 +521,22 @@ def hit_enemy():
             else:
                 screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
 
+    if boss_x <= current_x <= boss_x + 200 and boss_y <= current_y <= boss_y + 200:
+        boss_HP -= 1
+        if shoot:
+            screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
+        if timer <= 0:
+            shoot = False
+            timer = 15
+        current_x = -1 - cam_x
+        current_y = -1 - cam_y
+
+        if boss_HP <= 0:
+            exit()
+
+    else:
+        screen.blit(trigger, (current_x + cam_x - 15, current_y + cam_y - 15))
+
 
 def orcs_damage():
     global orcs, orc_cx, orc_cy, True_HP, wait
@@ -528,6 +545,9 @@ def orcs_damage():
             if orc.x + cam_x - 50 < champ_pos_x < orc.x + cam_x + 50 and orc.y + cam_y - 50 < champ_pos_y < orc.y + cam_y + 50 and orc.alive:
                 True_HP -= 1
                 wait = 0
+            if boss_x + cam_x - 50 < champ_pos_x < boss_x + cam_x + 50 and boss_y + cam_y - 50 < champ_pos_y <boss_y + cam_y + 50:
+                True_HP -= 1
+
         if True_HP <= 0:
             exit()
 
@@ -568,7 +588,7 @@ def boss_movement():
                     timer_boss = 160
 
 
-boss_HP = 16
+
 def game_output():
     global shoot, orc_lives, timer, enemy_direction, orc_x, orc_y, orc_dir, duration,\
         movement_count, attack_rad, ability, ability_cooldown, on_cooldown, mana, HP, boss_show, boss_x, boss_y, boss_HP
